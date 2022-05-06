@@ -21,16 +21,16 @@ tr_idx = 1;
 for i = 1:length(all_tr)
     label = i;
     files = all_tr{i};
-    for j = 1:50 %length(files)
+    for j = 1:length(files)
         labels_tr(tr_idx) = label - 1;
         images_training(:, :, :, tr_idx) = imresize(imread(strcat(files(j).folder, "/", files(j).name)), [targetX, targetY]);
-        tumor_images_training(:,:, tr_idx) = images_training(:,:,1,tr_idx);
+        images_train(:,:, tr_idx) = mat2gray(images_training(:,:,1,tr_idx));
         tr_idx = tr_idx + 1;
     end
 end
 
 figure;
-imshow(tumor_images_training(:,:,1))
+imshow(images_train(:,:,1))
 
 
 %% for testing data
@@ -46,20 +46,20 @@ te_idx = 1;
 for i = 1:length(all_te)
     label = i;
     files = all_te{i};
-    for j = 1:50 %length(files)
+    for j = 1:length(files)
         labels_te(te_idx) = label - 1;
         images_testing(:, :, :, te_idx) = imresize(imread(strcat(files(j).folder, "/", files(j).name)), [targetX, targetY]);
-        tumor_images_testing(:,:,te_idx) = images_testing(:,:,1,te_idx);
+        images_test(:,:,te_idx) = mat2gray(images_testing(:,:,1,te_idx));
         te_idx = te_idx + 1;
     end
 end
 
 figure;
-imshow(tumor_images_testing(:,:,1))
+imshow(images_test(:,:,1))
 
 
 %% Saving the data
-save("tumor_training.mat", "labels_tr", "tumor_images_training");
-save("tumor_testing.mat", "labels_te", "tumor_images_testing");
+save("tumor_training.mat", "labels_tr", "images_train");
+save("tumor_testing.mat", "labels_te", "images_test");
 
 
