@@ -28,10 +28,7 @@ for i = 1:length(all_tr)
         tr_idx = tr_idx + 1;
     end
 end
-
-figure;
-imshow(images_train(:,:,1))
-
+labels_tr = labels_tr';
 
 %% for testing data
 glioma_images_te = dir("Testing\glioma_tumor\*.jpg");
@@ -53,13 +50,33 @@ for i = 1:length(all_te)
         te_idx = te_idx + 1;
     end
 end
+labels_te = labels_te';
 
-figure;
-imshow(images_test(:,:,1))
 
+%% combining all the data
+all_images = cat(3,images_train, images_test);
+all_labels = cat(1,labels_tr, labels_te);
+
+%% reordering the data in "random format"
+load("perm.mat"); % loading in the random permutation
+
+labels = all_labels(perm);
+imgs = all_images(:,:,perm);
+
+%% splitting the data intro different sets
+labels_train = labels(1:floor(length(labels)*0.6));
+labels_val = labels(floor(length(labels)*0.6) : floor(length(labels)*0.8));
+labels_test = labels(floor(length(labels)*0.8) : end);
+
+img_train = imgs(:,:,1:floor(length(labels)*0.6));
+img_val = imgs(:,:,floor(length(labels)*0.6) : floor(length(labels)*0.8));
+img_test = imgs(:,:,floor(length(labels)*0.8) : end);
 
 %% Saving the data
-save("tumor_training.mat", "labels_tr", "images_train");
-save("tumor_testing.mat", "labels_te", "images_test");
+save("tumor_data.mat", "labels", "imgs");
+save("tumor_train_data.mat", "labels_train", "img_train");
+save("tumor_val_data.mat", "labels_val", "img_val");
+save("tumor_test_data.mat", "labels_test", "img_test");
+
 
 
