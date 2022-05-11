@@ -6,74 +6,142 @@ data_label = [0,1,2,3];
 targetX = 64;
 targetY = targetX; % square image
 
-%% for training data
-glioma_images_tr = dir("Training\glioma_tumor\*.jpg");
-meningioma_images_tr = dir("Training\meningioma_tumor\*.jpg");
-pituitary_images_tr = dir("Training\pituitary_tumor\*.jpg");
-no_images_tr = dir( "Training\no_tumor\*.jpg");
+%% load in all data
 
-size(glioma_images_tr)
+glioma_input_tr = dir("Training\glioma_tumor\*.jpg");
+meningioma_input_tr = dir("Training\meningioma_tumor\*.jpg");
+pituitary_input_tr = dir("Training\pituitary_tumor\*.jpg");
+no_input_tr = dir( "Training\no_tumor\*.jpg");
 
-all_tr = {no_images_tr, glioma_images_tr, meningioma_images_tr, pituitary_images_tr};
+glioma_input_te = dir("Testing\glioma_tumor\*.jpg");
+meningioma_input_te = dir("Testing\meningioma_tumor\*.jpg");
+pituitary_input_te = dir("Testing\pituitary_tumor\*.jpg");
+no_input_te = dir("Testing\no_tumor\*.jpg");
 
-tr_idx = 1;
+%% concatenate training and test for split
 
-for i = 1:length(all_tr)
-    label = i;
-    files = all_tr{i};
+glioma_input_all = cat(1, glioma_input_tr, glioma_input_te);
+meningioma_input_all = cat(1, meningioma_input_tr, meningioma_input_te);
+pituitary_input_all = cat(1, pituitary_input_tr, pituitary_input_te);
+no_input_all = cat(1, no_input_tr, no_input_te);
+
+size(glioma_input_all)
+size(meningioma_input_all)
+size(pituitary_input_all)
+size(no_input_all)
+
+%% remove excess above 900
+
+% top limit to capture data
+limit = 900;
+
+glioma_input_all = glioma_input_all(1:limit);
+meningioma_input_all = meningioma_input_all(1:limit);
+pituitary_input_all = pituitary_input_all(1:limit);
+%no_input_all = no_input_all(1:limit);
+
+%% randomise before splitting set
+
+glioma_rand = glioma_input_all(randperm(length(glioma_input_all)));
+meningioma_rand = meningioma_input_all(randperm(length(meningioma_input_all)));
+pituitary_rand = pituitary_input_all(randperm(length(pituitary_input_all)));
+no_rand = no_input_all(randperm(length(no_input_all)));
+
+
+%% split into sets
+
+training_glioma = glioma_rand(1:600);
+validation_glioma = glioma_rand(601:750);
+testing_glioma = glioma_rand(751:900);
+
+training_meningioma = meningioma_rand(1:600);
+validation_meningioma = meningioma_rand(601:750);
+testing_meningioma = meningioma_rand(751:900);
+
+training_pituitary = pituitary_rand(1:600);
+validation_pituitary = pituitary_rand(601:750);
+testing_pituitary = pituitary_rand(751:900);
+
+training_no = pituitary_rand(1:300);
+validation_no = pituitary_rand(301:400);
+testing_no = pituitary_rand(401:500);
+
+%% gather training data
+
+data_training = {training_no, training_glioma, training_meningioma, training_pituitary};
+
+idx_tr = 1;
+
+for label = 1:length(data_training)
+    
+    files = data_training{label};
+    
     for j = 1:length(files)
-        labels_tr(tr_idx) = label - 1;
-        images_training(:, :, :, tr_idx) = imresize(imread(strcat(files(j).folder, "/", files(j).name)), [targetX, targetY]);
-        images_train(:,:, tr_idx) = mat2gray(images_training(:,:,1,tr_idx));
-        tr_idx = tr_idx + 1;
+        
+        labels_training(idx_tr) = label - 1;
+        images_training(:, :, :, idx_tr) = imresize(imread(strcat(files(j).folder, "/", files(j).name)), [targetX, targetY]);
+        final_images_training(:,:, idx_tr) = mat2gray(images_training(:,:,1,idx_tr));
+        idx_tr = idx_tr + 1;
     end
 end
-labels_tr = labels_tr';
+final_labels_training = labels_training';
 
-%% for testing data
-glioma_images_te = dir("Testing\glioma_tumor\*.jpg");
-meningioma_images_te = dir("Testing\meningioma_tumor\*.jpg");
-pituitary_images_te = dir("Testing\pituitary_tumor\*.jpg");
-no_images_te = dir("Testing\no_tumor\*.jpg");
+%% gather validation data
 
-all_te = {no_images_te, glioma_images_te, meningioma_images_te, pituitary_images_te};
+data_validation = {validation_no, validation_glioma, validation_meningioma, validation_pituitary};
 
-te_idx = 1;
+idx_v = 1;
 
-for i = 1:length(all_te)
-    label = i;
-    files = all_te{i};
+for label = 1:length(data_validation)
+    
+    files = data_validation{label};
+    
     for j = 1:length(files)
-        labels_te(te_idx) = label - 1;
-        images_testing(:, :, :, te_idx) = imresize(imread(strcat(files(j).folder, "/", files(j).name)), [targetX, targetY]);
-        images_test(:,:,te_idx) = mat2gray(images_testing(:,:,1,te_idx));
-        te_idx = te_idx + 1;
+        
+        labels_validation(idx_v) = label - 1;
+        images_validation(:, :, :, idx_v) = imresize(imread(strcat(files(j).folder, "/", files(j).name)), [targetX, targetY]);
+        final_images_validation(:,:, idx_v) = mat2gray(images_validation(:,:,1,idx_v));
+        idx_v = idx_v + 1;
     end
 end
-labels_te = labels_te';
+final_labels_validation = labels_validation';
 
 
-%% combining all the data
-all_images = cat(3,images_train, images_test);
-all_labels = cat(1,labels_tr, labels_te);
+%% gather testing data
 
-%% reordering the data in "random format"
-load("perm.mat"); % loading in the random permutation
+data_testing = {testing_no, testing_glioma, testing_meningioma, testing_pituitary};
 
-labels = all_labels(perm);
-imgs = all_images(:,:,perm);
+idx_t = 1;
 
-%% splitting the data intro different sets
-labels_train = labels(1:floor(length(labels)*0.6));
-labels_val = labels(floor(length(labels)*0.6) : floor(length(labels)*0.8));
-labels_test = labels(floor(length(labels)*0.8) : end);
+for label = 1:length(data_testing)
+    
+    files = data_testing{label};
+    
+    for j = 1:length(files)
+        
+        labels_testing(idx_t) = label - 1;
+        images_testing(:, :, :, idx_t) = imresize(imread(strcat(files(j).folder, "/", files(j).name)), [targetX, targetY]);
+        final_images_testing(:,:, idx_t) = mat2gray(images_testing(:,:,1,idx_t));
+        idx_t = idx_t + 1;
+    end
+end
+final_labels_testing = labels_testing';
+%% randomise data for output - mix labels
 
-img_train = imgs(:,:,1:floor(length(labels)*0.6));
-img_val = imgs(:,:,floor(length(labels)*0.6) : floor(length(labels)*0.8));
-img_test = imgs(:,:,floor(length(labels)*0.8) : end);
+training_randperm = randperm(2100);
+validation_randperm = randperm(550);
+testing_randperm = randperm(550);
+
+img_train = final_images_training(:, :, training_randperm);
+labels_train = final_labels_training(training_randperm);
+
+img_val = final_images_validation(:, :, validation_randperm);
+labels_val = final_labels_validation(validation_randperm);
+
+img_test = final_images_testing(:, :, testing_randperm);
+labels_test = final_labels_testing(testing_randperm);
 
 %% Saving the data
-save("tumor_data.mat", "labels", "imgs");
 save("tumor_train_data.mat", "labels_train", "img_train");
 save("tumor_val_data.mat", "labels_val", "img_val");
 save("tumor_test_data.mat", "labels_test", "img_test");
