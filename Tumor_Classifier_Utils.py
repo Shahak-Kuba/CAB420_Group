@@ -1,6 +1,9 @@
 import os
 # disable tensorflow warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+import random
+# for consistency
+random.seed(4)
 
 # Tensorflow
 import tensorflow as tf
@@ -24,6 +27,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import ParameterGrid
 from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
 
 #Matplotlib
 import matplotlib.pyplot as plt
@@ -72,3 +76,66 @@ def plot_cumulative_sum(cs, top90, top95, top99):
     plt.scatter(top99, cs[top99], c='#0f1234')
     plt.legend(["Num Components vs Accuracy", "90% recovered", "95% recovered", "99% recovered"])
     print('top90: ' + str(top90) + ',', 'top95: ' + str(top95) + ',', 'top99: ' + str(top99))
+
+
+
+############# CMC PLOT FUNCTIONS #######################
+def get_ranked_histogram_l1_distance(gallery_feat, gallery_Y, probe_feat, probe_Y, verbose = False):
+    
+    # storage for ranked histogram
+    # length equal to number of unique subjects in the gallery
+    ranked_histogram = np.zeros(len(np.unique(gallery_Y)))
+
+    # loop over all samples in the probe set
+    for i in range(len(probe_Y)):
+        # get the true ID of this sample
+        true_ID = probe_Y[i]
+        if verbose:
+            print('Searching for ID %d' % (true_ID))
+
+        # get the distance between the current probe and the whole gallery, L1 distance here. Note that L1
+        # may not always be the best choice, so consider your distance metric given your problem
+        dist = np.linalg.norm(gallery_feat - probe_feat[i,:], axis=1, ord=1)
+        if verbose:
+            print(dist)
+
+        # get the sorted order of the distances
+        a = np.argsort(dist)
+        # apply the order to the gallery IDs, such that the first ID in the list is the closest, the second
+        # ID is the second closest, and so on
+        ranked = gallery_Y[a]
+        if verbose:
+            print('Ranked IDs for query:')
+            print(a)
+
+        # find the location of the True Match in the ranked list
+        ranked_result = np.where(ranked == true_ID)[0][0]
+        if verbose:
+            print(ranked_result)
+
+        # store the ranking result in the histogram
+        ranked_histogram[ranked_result] += 1
+        if verbose:
+            print('')
+    
+    if verbose:
+        print(ranked_histogram)
+    
+    return ranked_histogram
+
+def ranked_hist_to_CMC(ranked_hist):
+
+    cmc = np.zeros(len(ranked_hist))
+    for i in range(len(ranked_hist)):
+        cmc[i] = np.sum(ranked_hist[:(i + 1)])
+    
+    return (cmc / len(ranked_hist))
+
+def plot_cmc(cmc):
+    fig = plt.figure(figsize=[10, 8])
+    ax = fig.add_subplot(1, 1, 1)
+    ax.plot(range(1, len(cmc)+1), cmc)
+    ax.set_xlabel('Rank')
+    ax.set_ylabel('Count')
+    ax.set_ylim([0, 1.0])
+    ax.set_title('CMC Curve')    
