@@ -3,7 +3,7 @@ clear all; close all; clc
 % 0 = no tumor, 1 = glioma, 2 = meningioma, 3 = pituitary
 data_label = [0,1,2,3];
 
-targetX = 244;
+targetX = 32;
 targetY = targetX; % square image
 
 %% load in all data

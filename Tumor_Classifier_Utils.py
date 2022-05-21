@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 # Data management libraries
 import scipy.io as scio
 import numpy as np
-
+import numpy
 # Visualising Packages
 import visualkeras as vk
 from PIL import ImageFont
@@ -77,7 +77,49 @@ def plot_cumulative_sum(cs, top90, top95, top99):
     plt.legend(["Num Components vs Accuracy", "90% recovered", "95% recovered", "99% recovered"])
     print('top90: ' + str(top90) + ',', 'top95: ' + str(top95) + ',', 'top99: ' + str(top99))
 
+def search_hyperparams(model, params, X_train, Y_train, X_validate, Y_validate):
+    # Create list of all possible combinations
+    param_list = list(ParameterGrid(params))
+    
+    # Initialising 
+    best_result = 0.00;
+    best_params = param_list[0];
+    worst_result = 1.00;
+    worst_params = param_list[0];
+    # looping through all parameters in parameter list
+    for params in param_list:
+        # creating model with set parameters
+        model = model.set_params(**params)
+        # training the model
+        model.fit(X_train, Y_train)
+        # retrieving model score
+        result = model.score(X_validate, Y_validate)
+        # checking if model score is better, then allocating best parameters
+        if result > best_result:
+            best_result = result
+            best_params = params
+        if result < worst_result:
+            worst_result = result
+            worst_params = params
 
+    
+    # Return the best
+    print(best_params)
+    print("Validation Accuracy " + str(best_result))
+    print(worst_params)
+    print("Validation Accuracy " + str(worst_result))
+    return best_params
+
+def eval_model_pca(model, X_train, Y_train, X_test, Y_test):
+    labels = ['No Tumour', 'Glioma', 'Meningioma', 'Pituitary']
+    fig = plt.figure(figsize=[25, 8])
+    ax = fig.add_subplot(1, 2, 1)
+    conf = ConfusionMatrixDisplay.from_estimator(model, X_train, Y_train, normalize='true', ax=ax, display_labels=labels)
+    #conf.ax_.set_title('Training Set Performance: %1.3f' % (sum(model.predict(X_train) == Y_train)/len(Y_train)));
+    ax = fig.add_subplot(1, 2, 2)
+    conf = ConfusionMatrixDisplay.from_estimator(model, X_test, Y_test, normalize='true', ax=ax, display_labels=labels)
+    #conf.ax_.set_title('Testing Set Performance: %1.3f' % (sum(model.predict(X_test) == Y_test)/len(Y_test)));
+    print(classification_report(Y_test, model.predict(X_test)))
 
 ############# CMC PLOT FUNCTIONS #######################
 def get_ranked_histogram_l1_distance(gallery_feat, gallery_Y, probe_feat, probe_Y, verbose = False):
