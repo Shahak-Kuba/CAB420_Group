@@ -3,7 +3,7 @@ clear all; close all; clc
 % 0 = no tumor, 1 = glioma, 2 = meningioma, 3 = pituitary
 data_label = [0,1,2,3];
 
-targetX = 32;
+targetX = 10;
 targetY = targetX; % square image
 
 %% load in all data
@@ -29,6 +29,7 @@ size(glioma_input_all)
 size(meningioma_input_all)
 size(pituitary_input_all)
 size(no_input_all)
+
 
 %% remove excess above 900
 
