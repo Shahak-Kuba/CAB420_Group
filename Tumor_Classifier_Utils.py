@@ -115,7 +115,38 @@ def load_data(dim):
 
     return x_train, y_train, x_val, y_val, x_test, y_test, N, num_classes
 
+def plot_loss(history):
+    keys = []
+    accuracies = []
+    losses = []
 
+    for key in history.history:
+        keys.append(key)
+    
+    for i in range(len(keys)):
+        if i%2 == 0:
+            losses.append(keys[i])
+        else:
+            accuracies.append(keys[i])
+
+    # plotting 
+    plt.figure(figsize=(10, 4))
+    for i  in range(len(accuracies)):
+        plt.plot(history.history[accuracies[i]], label=accuracies[i])
+    plt.title('Training and Validation Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+
+    plt.figure(figsize=(10, 4))
+    for i  in range(len(losses)):
+        plt.plot(history.history[losses[i]], label=losses[i])
+    plt.title('Training and Validation Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+
+        
 
 ## PCA Functions
 
