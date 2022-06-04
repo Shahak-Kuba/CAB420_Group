@@ -36,6 +36,7 @@ import matplotlib.pyplot as plt
 import scipy.io as scio
 import numpy as np
 import numpy
+import pandas as pd
 # Visualising Packages
 import visualkeras as vk
 from PIL import ImageFont
@@ -65,13 +66,55 @@ def class_weights():
 
 ######### General Functions ################
 
-def load_data(train_dir, val_dir, test_dir):
+def load_data(dim):
 
-    data_train = scio.loadmat(train_dir)
-    data_val = scio.loadmat(val_dir)
-    data_test = scio.loadmat(test_dir)
+    if(dim == 128):
+        data_train = scio.loadmat('Data/tumor_train_data_128.mat')
+        data_val = scio.loadmat('Data/tumor_val_data_128.mat')
+        data_test = scio.loadmat('Data/tumor_test_data_128.mat')
+
+        N = 128 # image dimensions (N x N after preprocessing)
+        num_classes = 4; # how many different types of classifications we have 
+
+        x_train = np.transpose(data_train['img_train'], (2, 0, 1)).reshape(-1, N, N, 1)
+        y_train = data_train['labels_train']
+        x_val = np.transpose(data_val['img_val'], (2, 0, 1)).reshape(-1, N, N, 1)
+        y_val = data_val['labels_val']
+        x_test = np.transpose(data_test['img_test'], (2, 0, 1)).reshape(-1, N, N, 1)
+        y_test = data_test['labels_test']
+        
+    elif(dim == 64):
+        data_train = scio.loadmat('Data/tumor_train_data_64.mat')
+        data_val = scio.loadmat('Data/tumor_val_data_64.mat')
+        data_test = scio.loadmat('Data/tumor_test_data_64.mat')
+
+        N = 64 # image dimensions (N x N after preprocessing)
+
+        x_train = np.transpose(data_train['img_train'], (2, 0, 1)).reshape(-1, N, N, 1)
+        y_train = data_train['labels_train']
+        x_val = np.transpose(data_val['img_val'], (2, 0, 1)).reshape(-1, N, N, 1)
+        y_val = data_val['labels_val']
+        x_test = np.transpose(data_test['img_test'], (2, 0, 1)).reshape(-1, N, N, 1)
+        y_test = data_test['labels_test']
+
+    else:
+        data_train = scio.loadmat('Data/tumor_train_data_32.mat')
+        data_val = scio.loadmat('Data/tumor_val_data_32.mat')
+        data_test = scio.loadmat('Data/tumor_test_data_32.mat')
+
+        N = 32 # image dimensions (N x N after preprocessing)
+
+        x_train = np.transpose(data_train['img_train'], (2, 0, 1)).reshape(-1, N, N, 1)
+        y_train = data_train['labels_train']
+        x_val = np.transpose(data_val['img_val'], (2, 0, 1)).reshape(-1, N, N, 1)
+        y_val = data_val['labels_val']
+        x_test = np.transpose(data_test['img_test'], (2, 0, 1)).reshape(-1, N, N, 1)
+        y_test = data_test['labels_test']
     
-    return data_train, data_val, data_test
+    num_classes = 4; # how many different types of classifications we have 
+
+    return x_train, y_train, x_val, y_val, x_test, y_test, N, num_classes
+
 
 
 ## PCA Functions
