@@ -52,6 +52,17 @@ cmp[layers.Flatten]['fill'] = 'teal'
 cmp[layers.Dropout]['fill'] = 'purple'
 
 
+######### Class Weights Vairable ###########
+def class_weights():
+    class_weights = {
+        0: 2.0,
+        1: 1.0,
+        2: 1.0,
+        3: 1.0
+    }
+    return class_weights
+
+
 ######### General Functions ################
 
 def load_data(train_dir, val_dir, test_dir):
