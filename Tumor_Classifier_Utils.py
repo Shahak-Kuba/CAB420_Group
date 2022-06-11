@@ -130,7 +130,8 @@ def plot_loss(history):
             accuracies.append(keys[i])
 
     # plotting 
-    plt.figure(figsize=(10, 4))
+    fig = plt.figure(figsize=[18, 6]) 
+    fig.add_subplot(1, 2, 1)
     for i  in range(len(accuracies)):
         plt.plot(history.history[accuracies[i]], label=accuracies[i])
     plt.title('Training and Validation Accuracy')
@@ -138,7 +139,7 @@ def plot_loss(history):
     plt.ylabel('Loss')
     plt.legend()
 
-    plt.figure(figsize=(10, 4))
+    fig.add_subplot(1, 2, 2)
     for i  in range(len(losses)):
         plt.plot(history.history[losses[i]], label=losses[i])
     plt.title('Training and Validation Loss')
