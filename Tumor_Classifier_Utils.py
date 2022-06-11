@@ -28,6 +28,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import ParameterGrid
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
+import time
 
 #Matplotlib
 import matplotlib.pyplot as plt
